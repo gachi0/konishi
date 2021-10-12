@@ -1,0 +1,2 @@
+# konishi
+いろいろdiscordBot
