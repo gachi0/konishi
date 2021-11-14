@@ -108,10 +108,14 @@ export default new class implements ICommand {
                 ]
             });
 
+            const ww2Cate = await intr.guild.channels.create("第三次世界大戦", { type: "GUILD_CATEGORY" });
+            const ww2 = await ww2Cate.createChannel("通話個室作成部屋", { type: "GUILD_VOICE", userLimit: 1 });
+
             guild.honmaCh = [honmaCh.id];
             guild.threadCh = [threadCh.id];
             guild.vcRole = [vcRole.id];
             guild.vcWelcCh = [vcTextCh.id];
+            guild.ww2vc = [ww2.id];
             await GuildEntity.repo.save(guild);
             await osusumeBtnIntr.editReply("設定が完了しました！");
         }

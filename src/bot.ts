@@ -5,16 +5,20 @@ import fs from "fs";
 
 export const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MEMBERS] });
 
+/** path 以下の ts | js ファイルの default を全部インポート */
 export const allImport = (path: string): Promise<unknown[]> => Promise.all(fs.readdirSync(`./src/${path}`)
     .filter((f: string) => /(\.js|\.ts)$/.test(f))
     .map(async (f: string) => (await import(`./${path}/${f.slice(0, -3)}`)).default));
 
+/** ary から target を消す */
 export const delAry = <T>(ary: T[], target: T) => {
     if (ary.includes(target)) {
         ary.splice(ary.indexOf(target), 1);
     }
     return ary;
 };
+
+export const userVcs: Record<string, { userId: string, textChId: string }> = {};
 
 export interface ICommand {
     data: SlashCommandBuilder;
