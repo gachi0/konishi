@@ -1,4 +1,4 @@
-import { Client, CommandInteraction, Intents } from "discord.js";
+import { ChannelManager, Client, CommandInteraction, Guild, Intents, RoleManager } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Column, Connection, createConnection, Entity, PrimaryColumn, Repository } from "typeorm";
 import fs from "fs";
@@ -36,6 +36,11 @@ export interface IEvent {
 /* eslint-disable indent */
 @Entity({ name: "guild" })
 export class GuildEntity {
+
+    static repo: Repository<GuildEntity>;
+    static get = async (id: string) =>
+        await GuildEntity.repo.findOne(id) ?? new GuildEntity(id);
+
     @PrimaryColumn()
     id: string;
 
@@ -69,13 +74,41 @@ export class GuildEntity {
     constructor(id: string) {
         this.id = id;
     }
-    static repo: Repository<GuildEntity>;
-    static get = async (id: string) =>
-        await GuildEntity.repo.findOne(id) ?? new GuildEntity(id);
+
+    /** 消えてるものを消す */
+    existCheck = async (guild?: Guild) => {
+
+        const delDeled = async (manager: ChannelManager | RoleManager, ids: string[]) => {
+            const result: string[] = [];
+            for (const i of ids) {
+                if (await manager.fetch(i)) {
+                    result.push(i);
+                }
+            }
+            return result;
+        };
+
+        if (!guild) {
+            guild = await client.guilds.fetch(this.id);
+            if (!guild) return;
+        }
+
+        this.welcCh = await delDeled(guild.channels, this.welcCh);
+        this.honmaCh = await delDeled(guild.channels, this.honmaCh);
+        this.vcRole = await delDeled(guild.roles, this.vcRole);
+        this.vcWelcCh = await delDeled(guild.channels, this.vcWelcCh);
+        this.threadCh = await delDeled(guild.channels, this.threadCh);
+        this.ww2vc = await delDeled(guild.channels, this.ww2vc);
+    };
 }
 
 @Entity({ name: "user" })
 export class UserEntity {
+
+    static repo: Repository<UserEntity>;
+    static get = async (id: string) =>
+        await UserEntity.repo.findOne(id) ?? new UserEntity(id);
+
     @PrimaryColumn()
     id: string;
 
@@ -85,9 +118,6 @@ export class UserEntity {
     constructor(id: string) {
         this.id = id;
     }
-    static repo: Repository<UserEntity>;
-    static get = async (id: string) =>
-        await UserEntity.repo.findOne(id) ?? new UserEntity(id);
 }
 
 /* eslint-enable */

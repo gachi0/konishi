@@ -42,17 +42,12 @@ const vcJoin = async (member: GuildMember, guild: GuildEntity, vc: vcOrStage, be
         }
     }
     if (guild.ww2vc.includes(vc.id)) {
-
         if (!vc.parent) return;
-
         const userVc = await vc.parent.createChannel(`${member.displayName}のボイスチャンネル`, {
             type: "GUILD_VOICE", permissionOverwrites: [
                 { id: member.id, allow: Permissions.ALL }
             ]
         });
-
-
-
         await member.voice.setChannel(userVc);
         const userTextCh = await vc.parent.createChannel(`${member.displayName}のテキストチャンネル`, {
             type: "GUILD_TEXT", permissionOverwrites: [
@@ -83,7 +78,6 @@ const vcLeave = async (member: GuildMember, guild: GuildEntity, vc: vcOrStage, a
         if (vc.members.size === 0) {
             await vc.delete();
         }
-
         const textCh = await vc.guild.channels.fetch(userVcs[vc.id].textChId);
         if (!textCh) return;
         if (member.id !== userVcs[vc.id].userId) {

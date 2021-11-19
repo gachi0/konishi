@@ -60,7 +60,7 @@ export default new class implements ICommand {
             await GuildEntity.repo.save(new GuildEntity(intr.guild.id));
             await initBtnIntr.reply(osusumeReplyContent);
         }
-        else if (initBtnIntr.customId === "konishiDisagreeInit") {
+        else {
             await initBtnIntr.reply("初期化を中止します。");
             return;
         }

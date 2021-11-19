@@ -21,7 +21,7 @@ export default new class implements IEvent {
                 return;
             }
             await cmd.execute(intr).catch(async e =>
-                await intr[intr.replied ? "followUp" : "reply"](`エラーが発生しました！\n\`\`\`${e}\`\`\``)
+                await intr[intr.replied || intr.deferred ? "followUp" : "reply"](`エラーが発生しました…\n\`\`\`${e}\`\`\``)
             );
         }
     };
