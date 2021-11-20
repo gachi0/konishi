@@ -1,5 +1,5 @@
-import { ChannelManager, Client, CommandInteraction, Guild, Intents, RoleManager } from "discord.js";
-import { SlashCommandBuilder } from "@discordjs/builders";
+import { ChannelManager, Client, CommandInteraction, Guild, Intents, InteractionReplyOptions, MessageButton, RoleManager, TextChannel } from "discord.js";
+import { SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder } from "@discordjs/builders";
 import { Column, Connection, createConnection, Entity, PrimaryColumn, Repository } from "typeorm";
 import fs from "fs";
 
@@ -18,10 +18,36 @@ export const delAry = <T>(ary: T[], target: T) => {
     return ary;
 };
 
+/** InteractionReplyOptionsのボタンを全部無効にする */
+export const allDisable = (opt: InteractionReplyOptions) => {
+    if (!opt.components) return opt;
+    for (let i = 0; i < opt.components.length; i++) {
+        opt.components[i].components = opt.components[i].components
+            .map(i => i instanceof MessageButton ? i.setDisabled(true) : i);
+    }
+    return opt;
+};
+
+/** chとuserIdを省略できるようにする */
+export const genAwaitMsgComponent = (ch: TextChannel, userId: string) =>
+    /** コンポーネントを待つ。来なかったらundefinedを返す */
+    async (msgId: string, time = 30000) => {
+        try {
+            return await ch.awaitMessageComponent({
+                filter: i => i.message.id === msgId && i.user.id === userId,
+                time: time
+            });
+        }
+        catch {
+            console.log("時間切れ");
+        }
+    };
+
+/** 通話個室 */
 export const userVcs: Record<string, { userId: string, textChId: string }> = {};
 
 export interface ICommand {
-    data: SlashCommandBuilder;
+    data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
     adminOnly?: boolean;
     execute(intr: CommandInteraction): Promise<void>;
 }
