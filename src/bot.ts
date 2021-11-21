@@ -28,9 +28,8 @@ export const allDisable = (opt: InteractionReplyOptions) => {
     return opt;
 };
 
-/** chとuserIdを省略できるようにする */
+/** コンポーネントを待つ。来なかったらundefinedを返す（chとuserIdを省略できる） */
 export const genAwaitMsgComponent = (ch: TextChannel, userId: string) =>
-    /** コンポーネントを待つ。来なかったらundefinedを返す */
     async (msgId: string, time = 30000) => {
         try {
             return await ch.awaitMessageComponent({
