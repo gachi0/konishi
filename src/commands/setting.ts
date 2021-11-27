@@ -1,10 +1,6 @@
-import { allDisable, genAwaitMsgComponent, GuildEntity, ICommand } from "../bot";
-import { SlashCommandBuilder } from "@discordjs/builders";
+import { allDisable, genAwaitMsgComponent, GuildEntity, ICommand, mapToStr } from "../bot";
+import { channelMention, roleMention, SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed, TextChannel } from "discord.js";
-
-// const userMention = (id: string) => `<@!${id}>`;
-const roleMention = (id: string) => `<@&${id}>`;
-const chMention = (id: string) => `<#${id}>`;
 
 export default new class implements ICommand {
     data = new SlashCommandBuilder()
@@ -29,22 +25,16 @@ const listCmd = async (intr: CommandInteraction) => {
     await intr.deferReply();
     const guild = await GuildEntity.get(intr.guildId);
     await guild.existCheck(intr.guild);
-
-    const mapToStr = (ary: string[], fn: (s: string) => string): string => {
-        const result = ary.map(fn).toString();
-        return result === "" ? "なし" : result;
-    };
-
     const embed = new MessageEmbed()
         .setTitle("設定の一覧")
-        .addField("参加者挨拶チャンネル", mapToStr(guild.welcCh, chMention))
+        .addField("参加者挨拶チャンネル", mapToStr(guild.welcCh, channelMention))
         .addField("挨拶内容", mapToStr(guild.welcMsg, m => `\`${m}\``))
-        .addField("ほんまの荒らし部屋", mapToStr(guild.honmaCh, chMention))
+        .addField("ほんまの荒らし部屋", mapToStr(guild.honmaCh, channelMention))
         .addField("vcロール", mapToStr(guild.vcRole, roleMention))
-        .addField("vc参加者挨拶チャンネル", mapToStr(guild.vcWelcCh, chMention))
+        .addField("vc参加者挨拶チャンネル", mapToStr(guild.vcWelcCh, channelMention))
         .addField("vc挨拶内容", mapToStr(guild.vcWelcMsg, m => `\`${m}\``))
-        .addField("スレッド自動作成部屋", mapToStr(guild.threadCh, chMention))
-        .addField("個人通話作成部屋", mapToStr(guild.ww2vc, chMention));
+        .addField("スレッド自動作成部屋", mapToStr(guild.threadCh, channelMention))
+        .addField("個人通話作成部屋", mapToStr(guild.ww2vc, channelMention));
 
     await intr.followUp({ embeds: [embed] });
 };

@@ -29,11 +29,11 @@ export const allDisable = (opt: InteractionReplyOptions) => {
 };
 
 /** コンポーネントを待つ。来なかったらundefinedを返す（chとuserIdを省略できる） */
-export const genAwaitMsgComponent = (ch: TextChannel, userId: string) =>
+export const genAwaitMsgComponent = (ch: TextChannel, userId?: string) =>
     async (msgId: string, time = 30000) => {
         try {
             return await ch.awaitMessageComponent({
-                filter: i => i.message.id === msgId && i.user.id === userId,
+                filter: i => i.message.id === msgId && userId ? i.user.id === userId : true,
                 time: time
             });
         }
@@ -41,6 +41,11 @@ export const genAwaitMsgComponent = (ch: TextChannel, userId: string) =>
             console.log("時間切れ");
         }
     };
+
+export const mapToStr = (ary: string[], fn: (s: string) => string): string => {
+    const result = ary.map(fn).toString();
+    return result === "" ? "なし" : result;
+};
 
 /** 通話個室 */
 export const userVcs: Record<string, { userId: string, textChId: string }> = {};
