@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, MessageActionRow, MessageButton, TextChannel } from "discord.js";
+import { CommandInteraction, MessageActionRow, MessageButton } from "discord.js";
 import { genAwaitMsgComponent, ICommand } from "../bot";
 
 const rand = (min: number, max: number) => Math.floor(Math.random() * (max - min) + min);
@@ -12,7 +12,7 @@ export default new class implements ICommand {
         .setName("random");
 
     execute = async (intr: CommandInteraction) => {
-        if (!(intr.channel instanceof TextChannel)) return;
+        if (!intr.channel) return;
         const min = intr.options.getInteger("最小値");
         const max = intr.options.getInteger("最大値");
         const row = new MessageActionRow().addComponents(

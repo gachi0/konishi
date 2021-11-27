@@ -1,4 +1,4 @@
-import { ChannelManager, Client, CommandInteraction, Guild, Intents, InteractionReplyOptions, MessageButton, RoleManager, TextChannel } from "discord.js";
+import { ChannelManager, Client, CommandInteraction, Guild, Intents, InteractionReplyOptions, MessageButton, RoleManager, TextBasedChannels } from "discord.js";
 import { SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder } from "@discordjs/builders";
 import { Column, Connection, createConnection, Entity, PrimaryColumn, Repository } from "typeorm";
 import fs from "fs";
@@ -29,7 +29,7 @@ export const allDisable = (opt: InteractionReplyOptions) => {
 };
 
 /** コンポーネントを待つ。来なかったらundefinedを返す（chとuserIdを省略できる） */
-export const genAwaitMsgComponent = (ch: TextChannel, userId?: string) =>
+export const genAwaitMsgComponent = (ch: TextBasedChannels, userId?: string) =>
     async (msgId: string, time = 30000) => {
         try {
             return await ch.awaitMessageComponent({
@@ -54,6 +54,7 @@ export const userVcs: Record<string, { userId: string, textChId: string }> = {};
 export interface ICommand {
     data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
     adminOnly?: boolean;
+    guildOnly?: boolean;
     execute(intr: CommandInteraction): Promise<void>;
 }
 

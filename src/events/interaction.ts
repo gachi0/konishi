@@ -16,6 +16,10 @@ export default new class implements IEvent {
         if (intr instanceof CommandInteraction) {
             const cmd = cmds[intr.commandName];
             if (!cmd) return;
+            if (cmd.guildOnly && !intr.guild) {
+                await intr.reply("このコマンドはサーバー内で使用してください！");
+                return;
+            }
             if (cmd.adminOnly && !(intr.member?.permissions as Permissions).has("ADMINISTRATOR")) {
                 await intr.reply({ content: "このコマンドは管理者のみが使えます！", ephemeral: true });
                 return;

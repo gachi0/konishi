@@ -1,6 +1,6 @@
 import { allDisable, genAwaitMsgComponent, ICommand, mapToStr } from "../bot";
 import { SlashCommandBuilder, userMention } from "@discordjs/builders";
-import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed, TextChannel } from "discord.js";
+import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 
 type JankenUser = Record<string, "gu" | "choki" | "pa">;
 
@@ -10,7 +10,7 @@ export default new class implements ICommand {
         .setDescription("複数人でじゃんけんをします！");
 
     execute = async (intr: CommandInteraction) => {
-        if (!(intr.channel instanceof TextChannel)) return;
+        if (!intr.channel) return;
         const jankenUsers: JankenUser = {};
 
         const replyContent = () => {

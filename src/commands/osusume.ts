@@ -1,16 +1,16 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed, TextChannel } from "discord.js";
+import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import { allDisable, genAwaitMsgComponent, GuildEntity, ICommand } from "../bot";
 
 export default new class implements ICommand {
     data = new SlashCommandBuilder()
         .setDescription("botのおすすめ設定をセットアップします！")
         .setName("osusume");
-
     adminOnly = true;
+    guildOnly = true;
 
     execute = async (intr: CommandInteraction) => {
-        if (!intr.guild || !(intr.channel instanceof TextChannel)) return;
+        if (!intr.guild || !intr.channel) return;
 
         const replyContent = {
             content: "botのおすすめ設定を適用しますか？",

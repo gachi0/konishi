@@ -8,6 +8,7 @@ export default new class implements ICommand {
         .setDescription("指定されたロールを全員に付けます！")
         .setName("add_role_everyone");
     adminOnly = true;
+    guildOnly = true;
     execute = async (intr: CommandInteraction) => {
         if (!intr.guild) return;
         const role = intr.options.getRole("role");
