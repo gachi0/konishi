@@ -42,6 +42,7 @@ export const genAwaitMsgComponent = (ch: TextChannel, userId?: string) =>
         }
     };
 
+/** 文字列の配列をmapして1つの文字列にくっつける 空文字列だった場合"なし"を返す */
 export const mapToStr = (ary: string[], fn: (s: string) => string): string => {
     const result = ary.map(fn).toString();
     return result === "" ? "なし" : result;
@@ -152,7 +153,7 @@ export class UserEntity {
 
 /* eslint-enable */
 
-export let con: Connection;
+let con: Connection;
 
 export const DBInit = async () => {
     con = await createConnection({
@@ -165,4 +166,3 @@ export const DBInit = async () => {
     GuildEntity.repo = con.getRepository(GuildEntity);
     UserEntity.repo = con.getRepository(UserEntity);
 };
-

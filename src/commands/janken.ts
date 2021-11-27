@@ -4,7 +4,6 @@ import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed, Text
 
 type JankenUser = Record<string, "gu" | "choki" | "pa">;
 
-
 export default new class implements ICommand {
     data = new SlashCommandBuilder()
         .setName("janken")
@@ -83,11 +82,18 @@ export default new class implements ICommand {
                 break;
             }
         }
-
+        // ボタンを無効化
         await intr.editReply(allDisable(replyContent()));
+
+        if (!Object.keys(jankenUsers).length) {
+            await intr.followUp("参加者は…誰一人来ませんでした…参加者0人です…");
+            return;
+        }
+
+        const resultEmbed = new MessageEmbed();
+        const gus: JankenUser = {};
         const chokis: JankenUser = {};
         const pas: JankenUser = {};
-        const gus: JankenUser = {};
 
         for (const [id, hand] of Object.entries(jankenUsers)) {
             if (hand === "gu") gus[id] = hand;
@@ -95,46 +101,32 @@ export default new class implements ICommand {
             else if (hand === "pa") pas[id] = hand;
         }
 
+        if (Object.keys(gus).length) {
+            resultEmbed.addField("ぐー", mapToStr(Object.keys(gus), userMention));
+        }
+        if (Object.keys(chokis).length) {
+            resultEmbed.addField("ちょき", mapToStr(Object.keys(chokis), userMention));
+        }
+        if (Object.keys(pas).length) {
+            resultEmbed.addField("ぱー", mapToStr(Object.keys(pas), userMention));
+        }
+
         // 出されている手の種類の数が2以外ならあいこ
         if ([gus, chokis, pas].filter(h => Object.keys(h).length).length !== 2) {
-            await intr.followUp({
-                embeds: [new MessageEmbed()
-                    .setTitle("あいこ！")
-                    .addField("ぐー", mapToStr(Object.keys(gus), userMention))
-                    .addField("ちょき", mapToStr(Object.keys(chokis), userMention))
-                    .addField("ぱー", mapToStr(Object.keys(pas), userMention))
-                ]
-            });
+            await intr.followUp({ embeds: [resultEmbed.setTitle("あいこ！")] });
             return;
         }
 
         // 判定
         if (!Object.keys(gus).length) {
-            await intr.followUp({
-                embeds: [new MessageEmbed()
-                    .setTitle("✌ ちょきの勝ち！")
-                    .addField("ちょき", mapToStr(Object.keys(chokis), userMention))
-                    .addField("ぱー", mapToStr(Object.keys(pas), userMention))
-                ]
-            });
+            resultEmbed.setTitle("✌ ちょきの勝ち！");
         }
         else if (!Object.keys(chokis).length) {
-            await intr.followUp({
-                embeds: [new MessageEmbed()
-                    .setTitle("🖐 ぱーの勝ち！")
-                    .addField("ぱー", mapToStr(Object.keys(pas), userMention))
-                    .addField("ぐー", mapToStr(Object.keys(gus), userMention))
-                ]
-            });
+            resultEmbed.setTitle("🖐 ぱーの勝ち！");
         }
         else if (!Object.keys(pas).length) {
-            await intr.followUp({
-                embeds: [new MessageEmbed()
-                    .setTitle("👊 ぐーの勝ち！")
-                    .addField("ぐー", mapToStr(Object.keys(gus), userMention))
-                    .addField("ちょき", mapToStr(Object.keys(chokis), userMention))
-                ]
-            });
+            resultEmbed.setTitle("👊 ぐーの勝ち！");
         }
+        await intr.followUp({ embeds: [resultEmbed] });
     };
 };
