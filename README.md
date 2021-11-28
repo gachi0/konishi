@@ -13,18 +13,19 @@
 
 **node.js v16 以上が必要です**
 
-### 必要なパッケージのインストール
+1. 必要なパッケージのインストール  
 ```
 npm i
 ```
 
-### configファイルの設定
+2. configファイルの設定  
 `config.json.sample` を `config.json` にリネーム  
 tokenにはボットのtokenを設定  
 clientidにはボットのclient idを設定  
 サーバースコープでコマンドを登録する場合は、guildidを設定（任意）
 
-### コマンドの登録
+3. コマンドの登録  
+
 アプリケーションスコープで登録する場合
 ```
 npm run cmdapp
@@ -34,7 +35,7 @@ npm run cmdapp
 npm run cmdguild
 ```
 
-### 実行！
+4. 実行！  
 ```
 npm start
 ```
