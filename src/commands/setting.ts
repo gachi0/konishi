@@ -1,6 +1,6 @@
 import { allDisable, genAwaitMsgComponent, GuildEntity, ICommand, mapToStr } from "../bot";
 import { channelMention, inlineCode, roleMention, SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed, TextBasedChannels } from "discord.js";
 
 export default new class implements ICommand {
     data = new SlashCommandBuilder()
@@ -13,11 +13,11 @@ export default new class implements ICommand {
     adminOnly = true;
     guildOnly = true;
 
-    execute = async (intr: CommandInteraction) => {
+    execute = async (intr: CommandInteraction, ch: TextBasedChannels) => {
         if (!intr.channel) return;
         const subcmd = intr.options.getSubcommand();
         if (subcmd === "list") { await listCmd(intr); }
-        else if (subcmd === "init") { await initCmd(intr); }
+        else if (subcmd === "init") { await initCmd(intr, ch); }
     };
 };
 
@@ -40,8 +40,8 @@ const listCmd = async (intr: CommandInteraction) => {
     await intr.followUp({ embeds: [embed] });
 };
 
-const initCmd = async (intr: CommandInteraction) => {
-    if (!intr.guild || !intr.channel) return;
+const initCmd = async (intr: CommandInteraction, ch: TextBasedChannels) => {
+    if (!intr.guild) return;
 
     // 初期化の確認に使うメッセージ
     const initReplyContent = {
@@ -62,7 +62,7 @@ const initCmd = async (intr: CommandInteraction) => {
 
     // 初期化するかどうかのボタンが押されるまで待つ
     const initReply = await intr.fetchReply();
-    const btnIntr = await genAwaitMsgComponent(intr.channel, intr.user.id)(initReply.id);
+    const btnIntr = await genAwaitMsgComponent(ch, intr.user.id)(initReply.id);
     await intr.editReply(allDisable(initReplyContent));
 
     if (btnIntr?.customId === "konishiAgreeInit") {

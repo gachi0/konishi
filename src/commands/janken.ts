@@ -1,6 +1,6 @@
 import { allDisable, genAwaitMsgComponent, ICommand, mapToStr } from "../bot";
 import { SlashCommandBuilder, userMention } from "@discordjs/builders";
-import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed, TextBasedChannels } from "discord.js";
 
 type JankenUser = Record<string, "gu" | "choki" | "pa">;
 
@@ -9,8 +9,7 @@ export default new class implements ICommand {
         .setName("janken")
         .setDescription("複数人でじゃんけんをします！");
 
-    execute = async (intr: CommandInteraction) => {
-        if (!intr.channel) return;
+    execute = async (intr: CommandInteraction, ch: TextBasedChannels) => {
         const jankenUsers: JankenUser = {};
 
         const replyContent = () => {
@@ -57,7 +56,7 @@ export default new class implements ICommand {
         const replyed = await intr.fetchReply();
         await intr.followUp(gameMasterReply);
         for (; ;) {
-            const com = await genAwaitMsgComponent(intr.channel)(replyed.id, 60000);
+            const com = await genAwaitMsgComponent(ch)(replyed.id, 60000);
             if (!com) { break; }
             else if (com.customId === "konishiGu") {
                 jankenUsers[com.user.id] = "gu";

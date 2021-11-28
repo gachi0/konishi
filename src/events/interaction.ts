@@ -1,4 +1,4 @@
-import { CommandInteraction, Interaction, Permissions } from "discord.js";
+import { CommandInteraction, Interaction, Permissions, TextBasedChannels } from "discord.js";
 import { allImport, ICommand, IEvent } from "../bot";
 
 const cmds: Record<string, ICommand> = {};
@@ -24,7 +24,12 @@ export default new class implements IEvent {
                 await intr.reply({ content: "このコマンドは管理者のみが使えます！", ephemeral: true });
                 return;
             }
-            await cmd.execute(intr).catch(async e =>
+            let ch = intr.channel;
+            if (!ch) {
+                ch = await intr.client.channels.fetch(intr.channelId) as TextBasedChannels;
+                if (!ch) return;
+            }
+            await cmd.execute(intr, ch).catch(async e =>
                 await intr[intr.replied || intr.deferred ? "followUp" : "reply"](`エラーが発生しました…\r\`\`\`\r${e}\r\`\`\``)
             );
         }

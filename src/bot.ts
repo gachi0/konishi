@@ -55,7 +55,7 @@ export interface ICommand {
     data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
     adminOnly?: boolean;
     guildOnly?: boolean;
-    execute(intr: CommandInteraction): Promise<void>;
+    execute(intr: CommandInteraction, ch?: TextBasedChannels): Promise<void>;
 }
 
 export interface IEvent {
@@ -107,7 +107,7 @@ export class GuildEntity {
         this.id = id;
     }
 
-    /** 消えてるものを消す */
+    /** idの中から現在存在しない チャンネル or ロールを削除する */
     existCheck = async (guild?: Guild) => {
 
         const delDeled = async (manager: ChannelManager | RoleManager, ids: string[]) => {

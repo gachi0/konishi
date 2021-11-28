@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed, TextBasedChannels } from "discord.js";
 import { allDisable, genAwaitMsgComponent, GuildEntity, ICommand } from "../bot";
 
 export default new class implements ICommand {
@@ -9,8 +9,8 @@ export default new class implements ICommand {
     adminOnly = true;
     guildOnly = true;
 
-    execute = async (intr: CommandInteraction) => {
-        if (!intr.guild || !intr.channel) return;
+    execute = async (intr: CommandInteraction, ch: TextBasedChannels) => {
+        if (!intr.guild) return;
 
         const replyContent = {
             content: "botのおすすめ設定を適用しますか？",
@@ -29,12 +29,12 @@ export default new class implements ICommand {
 
         // おすすめの設定を適用するかどうかのボタンが押されるのを待つ
         const replyMsg = await intr.fetchReply();
-        const btnIntr = await genAwaitMsgComponent(intr.channel, intr.user.id)(replyMsg.id);
+        const btnIntr = await genAwaitMsgComponent(ch, intr.user.id)(replyMsg.id);
 
         await intr.editReply(allDisable(replyContent));
         if (btnIntr?.customId === "konishiAgreeRecommendedSetting") {
             await btnIntr.reply("設定を作成中…");
-            const guild = await GuildEntity.get(intr.guild.id);
+            const guildData = await GuildEntity.get(intr.guild.id);
 
             const cate = await intr.guild.channels.create("konishi", { type: "GUILD_CATEGORY" });
             if (!cate) return;
@@ -74,12 +74,12 @@ export default new class implements ICommand {
             const ww2 = await ww2Cate.createChannel("通話個室作成部屋", { type: "GUILD_VOICE", userLimit: 1 });
 
             // データベースに保存
-            guild.honmaCh.push(honmaCh.id);
-            guild.threadCh.push(threadCh.id);
-            guild.vcRole.push(vcRole.id);
-            guild.vcWelcCh.push(vcTextCh.id);
-            guild.ww2vc.push(ww2.id);
-            await GuildEntity.repo.save(guild);
+            guildData.honmaCh.push(honmaCh.id);
+            guildData.threadCh.push(threadCh.id);
+            guildData.vcRole.push(vcRole.id);
+            guildData.vcWelcCh.push(vcTextCh.id);
+            guildData.ww2vc.push(ww2.id);
+            await GuildEntity.repo.save(guildData);
             await btnIntr.editReply("設定が完了しました！");
         }
         else if (btnIntr) {
