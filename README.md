@@ -19,9 +19,8 @@ npm i
 ```
 
 2. configファイルの設定  
-`config.json.sample` を `config.json` にリネーム  
+`config.toml.sample` を `config.toml` にリネーム  
 tokenにはボットのtokenを設定  
-clientidにはボットのclient idを設定  
 サーバースコープでコマンドを登録する場合は、guildidを設定（任意）
 
 3. コマンドの登録  

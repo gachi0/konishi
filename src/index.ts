@@ -1,5 +1,4 @@
-import { allImport, client, DBInit, IEvent } from "./bot";
-import { token } from "../config.json";
+import { allImport, client, DBInit, IEvent, config } from "./bot";
 
 const main = async () => {
     // イベント登録
@@ -7,7 +6,7 @@ const main = async () => {
         client[e.once ? "once" : "on"](e.name, (...args) => e.execute(...args).catch(console.error));
     }
     await DBInit();
-    await client.login(token);
+    await client.login(config.token);
 };
 
 main();

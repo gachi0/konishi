@@ -2,6 +2,7 @@ import { ChannelManager, Client, CommandInteraction, Guild, Intents, Interaction
 import { SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder } from "@discordjs/builders";
 import { Column, Connection, createConnection, Entity, PrimaryColumn, Repository } from "typeorm";
 import fs from "fs";
+import toml from "toml";
 
 export const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MEMBERS] });
 
@@ -50,6 +51,12 @@ export const mapToStr = (ary: string[], fn: (s: string) => string): string => {
 
 /** 通話個室 */
 export const userVcs: Record<string, { userId: string, textChId: string }> = {};
+
+/** 設定 */
+export const config: {
+    token: string,
+    guildId: string
+} = toml.parse(fs.readFileSync("./config.toml").toString());
 
 export interface ICommand {
     data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
