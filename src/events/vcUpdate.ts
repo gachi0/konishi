@@ -58,7 +58,9 @@ const vcJoin = async (member: GuildMember, guild: GuildEntity, vc: vcOrStage, be
         await userTextCh.send({
             embeds: [new MessageEmbed()
                 .setTitle("このチャンネルについて")
-                .setDescription(`このチャンネルと${userVc.toString()}はbotによって作成されたチャンネルです。\rこれらのチャンネルの管理権限は${member.toString()}に与えられますので、削除、編集など自由に行うことができます！\r${userVc.toString()}に誰一人いなくなったら、これらのチャンネルは削除されます！`)
+                .setDescription(`このチャンネルと${userVc.toString()}はbotによって作成されたチャンネルです。
+これらのチャンネルの管理権限は${member.toString()}に与えられますので、削除、編集など自由に行うことができます！
+${userVc.toString()}に誰一人いなくなったら、これらのチャンネルは削除されます！`)
             ]
         });
         userVcs[userVc.id] = { textChId: userTextCh.id, userId: member.id };
