@@ -1,5 +1,5 @@
-import { GuildMember, MessageEmbed, Permissions, StageChannel, TextChannel, VoiceChannel, VoiceState } from "discord.js";
-import { GuildEntity, IEvent, userVcs } from "../bot";
+import { DiscordAPIError, GuildMember, MessageEmbed, Permissions, StageChannel, TextChannel, VoiceChannel, VoiceState } from "discord.js";
+import { delAry, GuildEntity, IEvent, userVcs } from "../bot";
 
 const randomChoice = <T>(ary: T[]) => ary[Math.floor(Math.random() * ary.length)];
 type vcOrStage = VoiceChannel | StageChannel;
@@ -35,9 +35,20 @@ const vcJoin = async (member: GuildMember, guild: GuildEntity, vc: vcOrStage, be
     if (!beforeCh) {
         await member.roles.add(guild.vcRole);
         for (const c of guild.vcWelcCh) {
-            const ch = await vc.guild.channels.fetch(c);
+            let ch: TextChannel;
+            try {
+                ch = await vc.guild.channels.fetch(c) as TextChannel;
+            }
+            catch (err) {
+                // テキストチャンネルが消えていたらguild.vcWelcChからも消す
+                if (err instanceof DiscordAPIError && err.httpStatus === 404) {
+                    delAry(guild.vcWelcCh, c);
+                }
+                continue;
+            }
             if (ch instanceof TextChannel) {
                 await ch.send(randomChoice(guild.vcWelcMsg).replace(/\{nick\}/g, member.displayName));
+                console.log("よお");
             }
         }
     }
@@ -70,6 +81,7 @@ ${userVc.toString()}に誰一人いなくなったら、これらのチャンネ
         if (!textCh) return;
         await textCh.permissionOverwrites.edit(member.id, { VIEW_CHANNEL: true });
     }
+    await GuildEntity.repo.save(guild);
 };
 
 // ボイスチャンネルから出る（移動も含む）

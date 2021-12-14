@@ -1,4 +1,4 @@
-import { allDisable, genAwaitMsgComponent, GuildEntity, ICommand, mapToStr } from "../bot";
+import { allDisable, delDeled, genAwaitMsgComponent, GuildEntity, ICommand, mapToStr } from "../bot";
 import { channelMention, inlineCode, roleMention, SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed, TextBasedChannels } from "discord.js";
 
@@ -25,7 +25,14 @@ const listCmd = async (intr: CommandInteraction) => {
     if (!intr.guild) return;
     await intr.deferReply();
     const guild = await GuildEntity.get(intr.guildId);
-    await guild.existCheck(intr.guild);
+
+    guild.welcCh = await delDeled(intr.guild.channels, guild.welcCh);
+    guild.honmaCh = await delDeled(intr.guild.channels, guild.honmaCh);
+    guild.vcRole = await delDeled(intr.guild.roles, guild.vcRole);
+    guild.vcWelcCh = await delDeled(intr.guild.channels, guild.vcWelcCh);
+    guild.threadCh = await delDeled(intr.guild.channels, guild.threadCh);
+    guild.ww2vc = await delDeled(intr.guild.channels, guild.ww2vc);
+
     const embed = new MessageEmbed()
         .setTitle("設定の一覧")
         .addField("参加者挨拶チャンネル", mapToStr(guild.welcCh, channelMention))
@@ -38,6 +45,7 @@ const listCmd = async (intr: CommandInteraction) => {
         .addField("個人通話作成部屋", mapToStr(guild.ww2vc, channelMention));
 
     await intr.followUp({ embeds: [embed] });
+    await GuildEntity.repo.save(guild);
 };
 
 const initCmd = async (intr: CommandInteraction, ch: TextBasedChannels) => {

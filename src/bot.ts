@@ -1,4 +1,4 @@
-import { ChannelManager, Client, CommandInteraction, Guild, Intents, InteractionReplyOptions, MessageButton, RoleManager, TextBasedChannels } from "discord.js";
+import { ChannelManager, Client, CommandInteraction, DiscordAPIError, Intents, InteractionReplyOptions, MessageButton, RoleManager, TextBasedChannels } from "discord.js";
 import { SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder } from "@discordjs/builders";
 import { Column, Connection, createConnection, Entity, PrimaryColumn, Repository } from "typeorm";
 import fs from "fs";
@@ -29,7 +29,7 @@ export const allDisable = (opt: InteractionReplyOptions) => {
     return opt;
 };
 
-/** コンポーネントを待つ。来なかったらundefinedを返す（chとuserIdを省略できる） */
+/** コンポーネントを待つ。来なかったらnullを返す（chとuserIdを省略できる） */
 export const genAwaitMsgComponent = (ch: TextBasedChannels, userId?: string) =>
     async (msgId: string, time = 30000) => {
         try {
@@ -39,7 +39,7 @@ export const genAwaitMsgComponent = (ch: TextBasedChannels, userId?: string) =>
             });
         }
         catch {
-            console.log("時間切れ");
+            return null;
         }
     };
 
@@ -47,6 +47,24 @@ export const genAwaitMsgComponent = (ch: TextBasedChannels, userId?: string) =>
 export const mapToStr = (ary: string[], fn: (s: string) => string): string => {
     const result = ary.map(fn).toString();
     return result === "" ? "なし" : result;
+};
+
+/** idの中からmanagerに存在しない チャンネル or ロールを削除する */
+export const delDeled = async (manager: ChannelManager | RoleManager, ids: string[]) => {
+    const result = [];
+    for (const i of ids) {
+        try {
+            await manager.fetch(i);
+            result.push(i);
+        }
+        catch (error) {
+            if (error instanceof DiscordAPIError && error.httpStatus === 404) {
+                continue;
+            }
+            throw error;
+        }
+    }
+    return result;
 };
 
 /** 通話個室 */
@@ -113,32 +131,6 @@ export class GuildEntity {
     constructor(id: string) {
         this.id = id;
     }
-
-    /** idの中から現在存在しない チャンネル or ロールを削除する */
-    existCheck = async (guild?: Guild) => {
-
-        const delDeled = async (manager: ChannelManager | RoleManager, ids: string[]) => {
-            const result: string[] = [];
-            for (const i of ids) {
-                if (await manager.fetch(i)) {
-                    result.push(i);
-                }
-            }
-            return result;
-        };
-
-        if (!guild) {
-            guild = await client.guilds.fetch(this.id);
-            if (!guild) return;
-        }
-
-        this.welcCh = await delDeled(guild.channels, this.welcCh);
-        this.honmaCh = await delDeled(guild.channels, this.honmaCh);
-        this.vcRole = await delDeled(guild.roles, this.vcRole);
-        this.vcWelcCh = await delDeled(guild.channels, this.vcWelcCh);
-        this.threadCh = await delDeled(guild.channels, this.threadCh);
-        this.ww2vc = await delDeled(guild.channels, this.ww2vc);
-    };
 }
 
 @Entity({ name: "user" })
