@@ -74,10 +74,11 @@ const vcJoin = async (member: GuildMember, guild: GuildEntity, vc: vcOrStage, be
 ${userVc.toString()}に誰一人いなくなったら、これらのチャンネルは削除されます！`)
             ]
         });
-        userVcs[userVc.id] = { textChId: userTextCh.id, userId: member.id };
+        userVcs.set(userVc.id, { textChId: userTextCh.id, userId: member.id });
     }
-    if (vc.id in userVcs) {
-        const textCh = await vc.guild.channels.fetch(userVcs[vc.id].textChId);
+    const userVc = userVcs.get(vc.id);
+    if (userVc) {
+        const textCh = await vc.guild.channels.fetch(userVc.textChId);
         if (!textCh) return;
         await textCh.permissionOverwrites.edit(member.id, { VIEW_CHANNEL: true });
     }
@@ -87,14 +88,15 @@ ${userVc.toString()}に誰一人いなくなったら、これらのチャンネ
 // ボイスチャンネルから出る（移動も含む）
 const vcLeave = async (member: GuildMember, guild: GuildEntity, vc: vcOrStage, afterCh?: vcOrStage) => {
     if (!afterCh) await member.roles.remove(guild.vcRole);
-    if (vc.id in userVcs) {
+    const userVc = userVcs.get(vc.id);
+    if (userVc) {
         // 0人になったらuserVc消滅(userVcが消えると同時にテキストチャンネルも消える)
         if (vc.members.size === 0) {
             await vc.delete();
         }
-        const textCh = await vc.guild.channels.fetch(userVcs[vc.id].textChId);
+        const textCh = await vc.guild.channels.fetch(userVc.textChId);
         if (!textCh) return;
-        if (member.id !== userVcs[vc.id].userId) {
+        if (member.id !== userVc.userId) {
             await textCh.permissionOverwrites.edit(member.id, { VIEW_CHANNEL: null });
         }
     }

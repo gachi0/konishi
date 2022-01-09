@@ -68,7 +68,7 @@ export const delDeled = async (manager: ChannelManager | RoleManager, ids: strin
 };
 
 /** 通話個室 */
-export const userVcs: Record<string, { userId: string, textChId: string }> = {};
+export const userVcs = new Map<string, { userId: string, textChId: string }>();
 
 /** 設定 */
 export const config: {

@@ -2,21 +2,19 @@ import { allDisable, genAwaitMsgComponent, ICommand, mapToStr } from "../bot";
 import { SlashCommandBuilder, userMention } from "@discordjs/builders";
 import { CommandInteraction, MessageActionRow, MessageButton, MessageEmbed, TextBasedChannels } from "discord.js";
 
-type JankenUser = Record<string, "gu" | "choki" | "pa">;
-
 export default new class implements ICommand {
     data = new SlashCommandBuilder()
         .setName("janken")
         .setDescription("複数人でじゃんけんをします！");
 
     execute = async (intr: CommandInteraction, ch: TextBasedChannels) => {
-        const jankenUsers: JankenUser = {};
+        const jankenUsers = new Map<string, "gu" | "choki" | "pa">();
 
         const replyContent = () => {
             return {
                 embeds: [new MessageEmbed()
                     .setTitle("じゃんけんぽん！")
-                    .addField("現在の参加者", mapToStr(Object.keys(jankenUsers), userMention))
+                    .addField("現在の参加者", mapToStr([...jankenUsers.keys()], userMention))
                 ],
                 components: [new MessageActionRow().addComponents(
                     new MessageButton()
@@ -59,19 +57,19 @@ export default new class implements ICommand {
             const com = await genAwaitMsgComponent(ch)(replyed.id, 60000);
             if (!com) { break; }
             else if (com.customId === "konishiGu") {
-                jankenUsers[com.user.id] = "gu";
+                jankenUsers.set(com.user.id, "gu");
                 await com.reply({ content: "あなたはグーを出しました！", ephemeral: true });
             }
             else if (com.customId === "konishiChoki") {
-                jankenUsers[com.user.id] = "choki";
+                jankenUsers.set(com.user.id, "choki");
                 await com.reply({ content: "あなたはチョキを出しました！", ephemeral: true });
             }
             else if (com.customId === "konishiPa") {
-                jankenUsers[com.user.id] = "pa";
+                jankenUsers.set(com.user.id, "pa");
                 await com.reply({ content: "あなたはパーを出しました！", ephemeral: true });
             }
             else if (com.customId === "konishiCancel") {
-                delete jankenUsers[com.user.id];
+                jankenUsers.delete(com.user.id);
                 await com.reply({ content: "参加を取り消しました！", ephemeral: true });
             }
             await intr.editReply(replyContent());
@@ -84,46 +82,46 @@ export default new class implements ICommand {
         // ボタンを無効化
         await intr.editReply(allDisable(replyContent()));
 
-        if (!Object.keys(jankenUsers).length) {
+        if (!jankenUsers.size) {
             await intr.followUp("参加者は…誰一人来ませんでした…参加者0人です…");
             return;
         }
 
         const resultEmbed = new MessageEmbed();
-        const gus: JankenUser = {};
-        const chokis: JankenUser = {};
-        const pas: JankenUser = {};
+        const gus: string[] = [];
+        const chokis: string[] = [];
+        const pas: string[] = [];
 
-        for (const [id, hand] of Object.entries(jankenUsers)) {
-            if (hand === "gu") gus[id] = hand;
-            else if (hand === "choki") chokis[id] = hand;
-            else if (hand === "pa") pas[id] = hand;
+        for (const [id, hand] of jankenUsers) {
+            if (hand === "gu") gus.push(id);
+            else if (hand === "choki") pas.push(id);
+            else if (hand === "pa") chokis.push(id);
         }
 
-        if (Object.keys(gus).length) {
-            resultEmbed.addField("ぐー", mapToStr(Object.keys(gus), userMention));
+        if (gus.length) {
+            resultEmbed.addField("ぐー", mapToStr(gus, userMention));
         }
-        if (Object.keys(chokis).length) {
-            resultEmbed.addField("ちょき", mapToStr(Object.keys(chokis), userMention));
+        if (chokis.length) {
+            resultEmbed.addField("ちょき", mapToStr(chokis, userMention));
         }
-        if (Object.keys(pas).length) {
-            resultEmbed.addField("ぱー", mapToStr(Object.keys(pas), userMention));
+        if (pas.length) {
+            resultEmbed.addField("ぱー", mapToStr(pas, userMention));
         }
 
         // 出されている手の種類の数が2以外ならあいこ
-        if ([gus, chokis, pas].filter(h => Object.keys(h).length).length !== 2) {
+        if ([gus, chokis, pas].filter(h => h.length).length !== 2) {
             await intr.followUp({ embeds: [resultEmbed.setTitle("あいこ！")] });
             return;
         }
 
         // 判定
-        if (!Object.keys(gus).length) {
+        if (!gus.length) {
             resultEmbed.setTitle("✌ ちょきの勝ち！");
         }
-        else if (!Object.keys(chokis).length) {
+        else if (!chokis.length) {
             resultEmbed.setTitle("🖐 ぱーの勝ち！");
         }
-        else if (!Object.keys(pas).length) {
+        else if (!pas.length) {
             resultEmbed.setTitle("👊 ぐーの勝ち！");
         }
         await intr.followUp({ embeds: [resultEmbed] });
